@@ -19,6 +19,8 @@
     will-change: transform;
   }
   .cursor.is-visible { opacity: 1; }
+  /* Modals live in the top layer, above this cursor: hand back the native one. */
+  :global(.has-modal) .cursor { opacity: 0; }
   .cursor__dot {
     position: absolute;
     inset: 0;

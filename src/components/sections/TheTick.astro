@@ -247,7 +247,8 @@ const stateFor = (i: number) => {
   const vis = watchVisibility(section);
   const schedule = () => window.setTimeout(beat, 1000 - (Date.now() % 1000));
   const beat = () => {
-    if (!stopped && vis.visible && !document.hidden && !reduced) {
+    const modal = document.documentElement.classList.contains('has-modal');
+    if (!stopped && vis.visible && !document.hidden && !reduced && !modal) {
       step(1);
       sec = (sec + 1) % 60;
       secEl.textContent = pad2(sec);

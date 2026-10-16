@@ -1,8 +1,10 @@
 <dialog class="qv" data-quickview-dialog aria-labelledby="qv-title">
   <div class="qv__panel" data-qv-panel>
     <button class="qv__close mono" type="button" data-dialog-close aria-label="Close quick view">Close ✕</button>
-    <div class="qv__media grain" data-qv-media></div>
-    <div class="qv__body" data-qv-body></div>
+    <div class="qv__scroll" data-qv-scroll data-lenis-prevent>
+      <div class="qv__media grain" data-qv-media></div>
+      <div class="qv__body" data-qv-body></div>
+    </div>
   </div>
 </dialog>
 
@@ -17,22 +19,36 @@
     background: transparent;
     overflow: visible;
   }
-  .qv::backdrop { background: rgba(0, 0, 0, 0.35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: hc-fade 0.6s var(--ease-expo); }
-  @keyframes hc-fade { from { opacity: 0; } }
+  .qv::backdrop {
+    background: rgba(0, 0, 0, 0.35);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-cubic);
+  }
+  .qv:global(.is-open)::backdrop { opacity: 1; }
+  @starting-style { .qv:global(.is-open)::backdrop { opacity: 0; } }
 
+  /* The panel clips; only the inner wrapper scrolls, so Close stays in view. */
   .qv__panel {
     position: relative;
-    display: grid;
-    grid-template-columns: 1fr;
     max-height: calc(100dvh - 2 * var(--gutter));
-    overflow: auto;
-    overscroll-behavior: contain;
+    display: flex;
+    overflow: hidden;
     background: var(--color-white);
     border-radius: var(--radius-glass);
     color: var(--color-ink);
   }
+  .qv__scroll {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
   @media (min-width: 768px) {
-    .qv__panel { grid-template-columns: 1fr 1fr; overflow: hidden; }
+    .qv__scroll { grid-template-columns: 1fr 1fr; }
   }
   .qv__close {
     position: absolute;
@@ -43,14 +59,16 @@
     text-transform: uppercase;
     padding: 8px 12px;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.85);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   }
   .qv__media { background: var(--color-paper); aspect-ratio: 1; display: grid; place-items: center; }
   @media (min-width: 768px) { .qv__media { aspect-ratio: auto; min-height: 560px; } }
   :global(.qv__img) { width: 84%; height: 84%; object-fit: contain; }
   :global(.qv__img.is-sold) { filter: grayscale(1); }
   .qv__body { padding: 28px; display: flex; flex-direction: column; gap: 16px; }
-  @media (min-width: 768px) { .qv__body { padding: 40px; overflow: auto; } }
+  @media (min-width: 768px) { .qv__body { padding: 40px; padding-right: 56px; } }
 
   :global(.qv__maison) { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; }
   :global(.qv__title) { font-family: var(--font-display); font-stretch: 62%; font-weight: 800; text-transform: uppercase; line-height: 0.88; font-size: clamp(36px, 4vw, 56px); }
@@ -64,11 +82,13 @@
   import { productById, categoryById, formatCHF } from '../../data/products';
   import { specRowsHTML } from '../../scripts/spec';
   import { pillHTML, esc } from '../../scripts/ui';
+  import { $cart } from '../../scripts/cart';
 
   const dialog = document.querySelector<HTMLDialogElement>('[data-quickview-dialog]')!;
   const panel = dialog.querySelector<HTMLElement>('[data-qv-panel]')!;
   const media = dialog.querySelector<HTMLElement>('[data-qv-media]')!;
   const body = dialog.querySelector<HTMLElement>('[data-qv-body]')!;
+  const scroller = dialog.querySelector<HTMLElement>('[data-qv-scroll]')!;
   const qv = makeDialog(dialog, panel, { from: { y: 40, scale: 0.97, opacity: 0 } });
 
   on('hc:quickview', (d) => {
@@ -78,6 +98,8 @@
     panel.style.setProperty('--accent', cat.accent);
     panel.style.setProperty('--on-accent', cat.onAccent);
     const sold = p.status === 'sold_out';
+    const owned = p.status === 'one_of_one' && $cart.get().some((l) => l.id === p.id);
+    const label = sold ? 'Sold out' : owned ? 'Already in your cart' : 'Add to cart';
     media.innerHTML = `<img class="qv__img${sold ? ' is-sold' : ''}" src="${p.images[0]}" alt="${esc(p.title)}, ${esc(p.maison)}" width="1000" height="1000" />`;
     body.innerHTML = `
       <p class="qv__maison">● ${esc(p.maison)} — ${esc(cat.label)}</p>
@@ -85,8 +107,10 @@
       <p class="qv__price">${formatCHF(p.priceCHF)}${p.status === 'one_of_one' ? ' <span class="badge badge--ink" style="vertical-align:middle;margin-left:8px">One of one</span>' : ''}${sold ? ' <span class="stamp" style="display:inline-block;margin-left:12px;font-size:18px">Sold out</span>' : ''}</p>
       <dl class="spec spec--compact">${specRowsHTML(p, true)}</dl>
       <div class="qv__actions">
-        ${pillHTML(sold ? 'Sold out' : 'Add to cart', `data-add="${p.id}" ${sold ? 'disabled' : ''}`, 'solid')}
+        ${pillHTML(label, `data-add="${p.id}" ${sold || owned ? 'disabled' : ''}`, 'solid')}
       </div>`;
+    // Each product starts at the top, even if the previous one was scrolled.
+    scroller.scrollTop = 0;
     qv.open();
   });
 </script>

@@ -8,7 +8,7 @@ import PillButton from './PillButton.astro';
       <h2 id="cart-title" class="display drawer__title">Cart <span class="mono drawer__count">(<span data-cart-count>0</span>)</span></h2>
       <button class="drawer__close mono" type="button" data-dialog-close aria-label="Close cart">Close ✕</button>
     </header>
-    <ul class="drawer__list" data-cart-list></ul>
+    <ul class="drawer__list" data-cart-list data-lenis-prevent></ul>
     <p class="drawer__empty" data-cart-empty>Nothing yet. Not even a box.</p>
     <footer class="drawer__foot">
       <div class="drawer__sub">
@@ -35,8 +35,9 @@ import PillButton from './PillButton.astro';
     background: transparent;
     overflow: visible;
   }
-  .drawer::backdrop { background: rgba(0, 0, 0, 0.2); animation: hc-fade 0.6s var(--ease-expo); }
-  @keyframes hc-fade { from { opacity: 0; } }
+  .drawer::backdrop { background: rgba(0, 0, 0, 0.2); opacity: 0; transition: opacity 0.35s var(--ease-cubic); }
+  .drawer:global(.is-open)::backdrop { opacity: 1; }
+  @starting-style { .drawer:global(.is-open)::backdrop { opacity: 0; } }
 
   .drawer__panel {
     height: 100%;

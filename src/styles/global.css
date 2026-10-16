@@ -64,6 +64,8 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     overflow-x: clip;
+    /* Keeps the layout still when a dialog locks scrolling. */
+    scrollbar-gutter: stable;
   }
   body {
     background: var(--color-paper);
@@ -332,8 +334,8 @@
 /* ==========================================================================
    Custom cursor: native cursor hidden only where ours is running.
    ========================================================================== */
-.has-cursor, .has-cursor * { cursor: none !important; }
-.has-cursor input, .has-cursor textarea { cursor: text !important; }
+.has-cursor:not(.has-modal), .has-cursor:not(.has-modal) * { cursor: none !important; }
+.has-cursor:not(.has-modal) input, .has-cursor:not(.has-modal) textarea { cursor: text !important; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
