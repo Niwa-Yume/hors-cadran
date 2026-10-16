@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="drop03-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#33271C"/><stop offset="1" stop-color="#100C09"/></linearGradient>
+<radialGradient id="drop03-spot" cx=".52" cy=".38" r=".55"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<radialGradient id="drop03-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#C69C6D" stop-opacity=".22"/><stop offset="1" stop-color="#C69C6D" stop-opacity="0"/></radialGradient>
+<linearGradient id="drop03-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
+</defs>
+<rect width="1600" height="1000" fill="url(#drop03-bg)"/>
+<ellipse cx="820" cy="560" rx="620" ry="360" fill="url(#drop03-glow)"/>
+<rect width="1600" height="1000" fill="url(#drop03-spot)"/>
+<rect y="720" width="1600" height="280" fill="url(#drop03-floor)"/>
+<g transform="translate(330 60) scale(.92)">
+<defs><radialGradient id="drop03o-sh"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="500" cy="760" rx="300" ry="30" fill="url(#drop03o-sh)"/>
+<defs>
+<linearGradient id="drop03o-sheen" gradientTransform="rotate(30 .5 .5)">
+<stop offset="0" stop-color="#fff" stop-opacity=".22"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+<stop offset="1" stop-color="#000" stop-opacity=".18"/>
+</linearGradient></defs>
+<g transform="rotate(-5 500 500)">
+<rect x="300" y="300" width="400" height="120" rx="14" fill="#D9DCDF"/>
+<rect x="320" y="300" width="360" height="22" rx="4" fill="#C4C8CC"/>
+<rect x="270" y="330" width="460" height="340" rx="28" fill="#223049"/>
+<rect x="270" y="330" width="460" height="340" rx="28" fill="url(#drop03o-sheen)"/>
+<path d="M290 410 Q500 448 710 410" fill="none" stroke="#151E30" stroke-width="5"/>
+<path d="M290 480 Q500 518 710 480" fill="none" stroke="#151E30" stroke-width="5"/>
+<path d="M298 352 H702 Q710 352 710 362 V640 Q710 650 700 650 H300 Q290 650 290 640 V362 Q290 352 298 352 Z" fill="none" stroke="#C9B48A" stroke-width="3" stroke-dasharray="9 8" stroke-linecap="round" opacity=".8"/>
+<rect x="470" y="600" width="60" height="6" rx="3" fill="#C9B48A" opacity=".7"/>
+</g></g>
+</svg>

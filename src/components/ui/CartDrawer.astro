@@ -1,0 +1,126 @@
+---
+import PillButton from './PillButton.astro';
+---
+
+<dialog class="drawer" data-cart-drawer aria-labelledby="cart-title">
+  <div class="drawer__panel glass-light" data-drawer-panel>
+    <header class="drawer__head">
+      <h2 id="cart-title" class="display drawer__title">Cart <span class="mono drawer__count">(<span data-cart-count>0</span>)</span></h2>
+      <button class="drawer__close mono" type="button" data-dialog-close aria-label="Close cart">Close ✕</button>
+    </header>
+    <ul class="drawer__list" data-cart-list></ul>
+    <p class="drawer__empty" data-cart-empty>Nothing yet. Not even a box.</p>
+    <footer class="drawer__foot">
+      <div class="drawer__sub">
+        <span class="mono drawer__sublabel">Subtotal</span>
+        <span class="mono drawer__total" data-cart-total>CHF 0</span>
+      </div>
+      <p class="drawer__note">Shipping calculated at checkout. Watches not included, as advertised.</p>
+      <PillButton variant="solid" block data-checkout>Checkout (demo)</PillButton>
+    </footer>
+  </div>
+</dialog>
+
+<style>
+  .drawer {
+    position: fixed;
+    inset: var(--gutter) var(--gutter) var(--gutter) auto;
+    width: min(460px, calc(100vw - 2 * var(--gutter)));
+    height: calc(100dvh - 2 * var(--gutter));
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .drawer::backdrop { background: rgba(0, 0, 0, 0.2); animation: hc-fade 0.6s var(--ease-expo); }
+  @keyframes hc-fade { from { opacity: 0; } }
+
+  .drawer__panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    color: var(--color-ink);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+  }
+  .drawer__head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 16px; border-bottom: 1px solid var(--color-line); }
+  .drawer__title { font-size: 40px; }
+  .drawer__count { font-size: 14px; font-weight: 400; vertical-align: top; }
+  .drawer__close { font-size: 12px; text-transform: uppercase; padding: 8px 0; }
+  .drawer__list { flex: 1; overflow: auto; overscroll-behavior: contain; padding-block: 8px; }
+  .drawer__empty { flex: 1; padding-top: 24px; color: var(--color-mute); }
+  .drawer__list:not(:empty) + .drawer__empty { display: none; }
+  .drawer__list:empty { display: none; }
+  .drawer__foot { border-top: 1px solid var(--color-line); padding-top: 16px; display: grid; gap: 12px; }
+  .drawer__sub { display: flex; justify-content: space-between; align-items: baseline; }
+  .drawer__sublabel { font-size: 11px; text-transform: uppercase; opacity: 0.6; }
+  .drawer__total { font-size: 22px; }
+  .drawer__note { font-size: 13px; color: #555; }
+
+  :global(.cart-line) {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  :global(.cart-line__thumb) { width: 72px; aspect-ratio: 1; border-radius: 8px; background: #fff; padding: 6px; object-fit: contain; }
+  :global(.cart-line__maison) { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; opacity: 0.6; }
+  :global(.cart-line__title) { font-family: var(--font-display); font-stretch: 62%; font-weight: 800; text-transform: uppercase; font-size: 20px; line-height: 0.95; }
+  :global(.cart-line__right) { display: grid; justify-items: end; gap: 6px; }
+  :global(.cart-line__price) { font-family: var(--font-mono); font-size: 13px; }
+  :global(.cart-line__remove) { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; opacity: 0.7; }
+  :global(.cart-line__remove:hover) { opacity: 1; color: var(--color-seconds-red); }
+</style>
+
+<script>
+  import { makeDialog } from '../../scripts/dialog';
+  import { $cart, $cartTotal, cartProducts, removeFromCart } from '../../scripts/cart';
+  import { emit, on } from '../../scripts/events';
+  import { formatCHF } from '../../data/products';
+  import { esc } from '../../scripts/ui';
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-cart-drawer]')!;
+  const panel = dialog.querySelector<HTMLElement>('[data-drawer-panel]')!;
+  const list = dialog.querySelector<HTMLElement>('[data-cart-list]')!;
+  const total = dialog.querySelector<HTMLElement>('[data-cart-total]')!;
+
+  const drawer = makeDialog(dialog, panel, { from: { x: '110%' } });
+  on('hc:cart-open', drawer.open);
+
+  $cart.subscribe(() => {
+    list.innerHTML = cartProducts()
+      .map(
+        ({ product: p, qty }) => `
+        <li class="cart-line">
+          <img class="cart-line__thumb" src="${p.images[0]}" alt="" width="72" height="72" loading="lazy" />
+          <div>
+            <p class="cart-line__maison">${esc(p.maison)}</p>
+            <p class="cart-line__title">${esc(p.title)}${qty > 1 ? ` <span class="mono" style="font-size:12px">×${qty}</span>` : ''}</p>
+          </div>
+          <div class="cart-line__right">
+            <span class="cart-line__price">${formatCHF(p.priceCHF * qty)}</span>
+            <button type="button" class="cart-line__remove" data-remove="${p.id}" aria-label="Remove ${esc(p.title)}">Remove</button>
+          </div>
+        </li>`,
+      )
+      .join('')
+      .trim();
+  });
+  $cartTotal.subscribe((n) => (total.textContent = formatCHF(n)));
+
+  list.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-remove]');
+    if (!btn) return;
+    removeFromCart(btn.dataset.remove!);
+    dialog.querySelector<HTMLElement>('[data-dialog-close]')?.focus();
+  });
+
+  dialog.querySelector('[data-checkout]')?.addEventListener('click', () => {
+    emit('hc:toast', { message: 'Checkout is a demo. Nothing was charged.' });
+  });
+</script>

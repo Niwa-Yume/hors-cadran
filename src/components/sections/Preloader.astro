@@ -1,0 +1,128 @@
+---
+import { BRAND_NAME } from '../../data/brand';
+---
+
+<div class="preloader" data-preloader aria-hidden="true">
+  <div class="pl-card pl-card--back pl-card--b2"></div>
+  <div class="pl-card pl-card--back pl-card--b1"></div>
+  <div class="pl-card pl-card--main" data-pl-card>
+    <div class="pl-inner" data-pl-inner>
+      <span class="gothic pl-wordmark">{BRAND_NAME}</span>
+      <p class="display pl-headline">Everything<br />but the<br />watch</p>
+      <span class="pl-label">Winding:</span>
+      <span class="mono pl-counter" data-pl-counter>00</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .preloader {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--color-ink-soft);
+    place-items: center;
+    cursor: pointer;
+  }
+  :global(.js) .preloader { display: grid; }
+  :global(.js.no-preloader) .preloader { display: none; }
+
+  .pl-card {
+    grid-area: 1 / 1;
+    width: 70vw;
+    height: 70vh;
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+  }
+  .pl-card--b1 { transform: translateX(12px); background: #bdbdbd; }
+  .pl-card--b2 { transform: translateX(24px); background: #7d7d7d; }
+  .pl-card--main { position: relative; overflow: hidden; }
+
+  .pl-inner {
+    position: absolute;
+    inset: 0;
+    padding: clamp(16px, 2.4vw, 32px);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+  }
+  .pl-wordmark { font-size: clamp(22px, 2.4vw, 34px); line-height: 1; }
+  .pl-headline {
+    grid-column: 1 / -1;
+    align-self: center;
+    font-size: clamp(44px, 8.5vw, 150px);
+  }
+  .pl-label { align-self: end; font-size: 14px; }
+  .pl-counter {
+    grid-column: 2;
+    align-self: end;
+    justify-self: end;
+    font-size: clamp(56px, 8vw, 128px);
+    line-height: 0.8;
+    font-weight: 500;
+    transition: color 0.3s var(--ease-cubic);
+  }
+  .pl-counter.is-done { color: var(--color-mute); }
+</style>
+
+<script>
+  import { gsap } from '../../scripts/gsap';
+  import { lockScroll } from '../../scripts/lenis';
+  import { pad2 } from '../../scripts/env';
+
+  const html = document.documentElement;
+  const el = document.querySelector<HTMLElement>('[data-preloader]');
+
+  const done = () => {
+    window.__hcPreloaded = true;
+    window.dispatchEvent(new CustomEvent('hc:preloaded'));
+  };
+
+  if (!el || html.classList.contains('no-preloader')) {
+    done();
+  } else {
+    const card = el.querySelector<HTMLElement>('[data-pl-card]')!;
+    const inner = el.querySelector<HTMLElement>('[data-pl-inner]')!;
+    const counter = el.querySelector<HTMLElement>('[data-pl-counter]')!;
+    const backs = el.querySelectorAll<HTMLElement>('.pl-card--back');
+    lockScroll(true);
+
+    let n = 0;
+    let finished = false;
+    // Dead-beat counter: integer jumps, 00 → 60 in ~1.1s.
+    const timer = window.setInterval(() => {
+      n += 1;
+      counter.textContent = pad2(n);
+      if (n >= 60) {
+        window.clearInterval(timer);
+        counter.classList.add('is-done');
+        window.setTimeout(() => expand(0.9), 120);
+      }
+    }, 18);
+
+    const expand = (duration: number) => {
+      if (finished) return;
+      finished = true;
+      window.clearInterval(timer);
+      try { sessionStorage.setItem('hc-preloaded', '1'); } catch { /* private mode */ }
+      const tl = gsap.timeline({
+        onComplete: () => {
+          el.remove();
+          html.classList.add('no-preloader');
+          lockScroll(false);
+        },
+      });
+      tl.to(inner, { opacity: 0, duration: Math.min(0.25, duration / 3), ease: 'hc-cubic' }, 0)
+        .to(backs, { opacity: 0, duration: 0.2 }, 0)
+        .to(card, { width: '100vw', height: '100vh', borderRadius: 0, duration, ease: 'hc-expo' }, 0)
+        // The paper card now is the page background: fade it away over nav + hero.
+        .add(done, duration * 0.7)
+        .to(el, { opacity: 0, duration: 0.3, ease: 'none' }, duration * 0.8);
+    };
+
+    const skip = () => expand(0.45);
+    el.addEventListener('click', skip);
+    window.addEventListener('keydown', (e) => e.key === 'Escape' && skip());
+  }
+</script>

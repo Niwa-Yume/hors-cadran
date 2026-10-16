@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<defs><radialGradient id="hc-0182-sh"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="500" cy="800" rx="300" ry="30" fill="url(#hc-0182-sh)"/>
+<defs>
+<linearGradient id="hc-0182-sheen" gradientTransform="rotate(25 .5 .5)">
+<stop offset="0" stop-color="#fff" stop-opacity=".22"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+<stop offset="1" stop-color="#000" stop-opacity=".18"/>
+</linearGradient></defs>
+<rect x="318" y="296" width="372" height="476" rx="14" fill="#EDE6D6"/>
+<rect x="300" y="280" width="372" height="480" rx="14" fill="#1C1C1C"/>
+<rect x="300" y="280" width="372" height="480" rx="14" fill="url(#hc-0182-sheen)"/>
+<rect x="620" y="280" width="14" height="480" fill="#555"/>
+<rect x="300" y="280" width="34" height="480" rx="10" fill="#141414"/>
+<g transform="rotate(-42 500 520)">
+<rect x="220" y="506" width="560" height="28" rx="14" fill="#2A2A2A"/>
+<rect x="220" y="506" width="140" height="28" rx="14" fill="#BFC3C7"/>
+<rect x="640" y="498" width="110" height="8" rx="4" fill="#BFC3C7"/>
+<polygon points="220,506 186,520 220,534" fill="#BFC3C7"/>
+</g></svg>

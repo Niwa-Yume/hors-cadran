@@ -1,0 +1,368 @@
+@import 'tailwindcss';
+@import 'lenis/dist/lenis.css';
+
+/* ==========================================================================
+   Tokens
+   ========================================================================== */
+@theme {
+  --color-paper: #f1f1f1;
+  --color-white: #ffffff;
+  --color-ink: #111111;
+  --color-ink-soft: #212121;
+  --color-mute: #9a9a9a;
+  --color-line: rgba(17, 17, 17, 0.15);
+  --color-black: #0a0a0a;
+  --color-slate: #1d252d;
+
+  --color-seconds-red: #cb4c3a;
+  --color-lume-lime: #d4e87a;
+  --color-strap-tan: #c69c6d;
+  --color-blued-steel: #87add3;
+  --color-enamel-green: #1f4b3f;
+  --color-chrome: #bfc3c7;
+
+  --font-display: 'Archivo Variable', 'Archivo', 'Arial Narrow', system-ui, sans-serif;
+  --font-sans: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-gothic: 'UnifrakturMaguntia', 'Old English Text MT', serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-card: 10px;
+  --radius-frame: 16px;
+  --radius-glass: 30px;
+  --radius-zine: 8px;
+
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-char: cubic-bezier(0.3, 0.86, 0.36, 0.95);
+
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+}
+
+:root {
+  --gutter: 10px;
+  --nav-h: 60px;
+  --nav-top: 16px;
+  --accent: var(--color-seconds-red);
+  --focus: var(--accent);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  body {
+    background: var(--color-paper);
+    overflow-x: clip;
+    min-height: 100svh;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  @media (min-width: 1024px) {
+    body { font-size: 16px; }
+  }
+  img { max-width: 100%; height: auto; }
+  button { cursor: pointer; font: inherit; color: inherit; }
+  button:disabled { cursor: not-allowed; }
+  ::selection { background: var(--color-ink); color: var(--color-lume-lime); }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* ==========================================================================
+   Type roles
+   ========================================================================== */
+@utility display {
+  font-family: var(--font-display);
+  font-stretch: 62%;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+}
+@utility mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+@utility serif-i {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+@utility gothic {
+  font-family: var(--font-gothic);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+/* Unlayered so it beats .pill's position: relative. */
+.skip-link, .pill.skip-link { position: absolute; left: -9999px; top: 16px; z-index: 3000; }
+.skip-link:focus, .pill.skip-link:focus { left: 16px; }
+
+.text-hero { font-size: clamp(56px, 11vw, 180px); }
+
+/* ==========================================================================
+   Surfaces
+   ========================================================================== */
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
+  border-radius: var(--radius-glass);
+  border: var(--glass-border);
+}
+/* Same glass recipe, tinted so ink text stays legible over any section. */
+.glass-light {
+  background: rgba(241, 241, 241, 0.72);
+  -webkit-backdrop-filter: blur(50px) saturate(1.2);
+  backdrop-filter: blur(50px) saturate(1.2);
+  border-radius: var(--radius-glass);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.glass-dark {
+  background: rgba(17, 17, 17, 0.55);
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
+  border: var(--glass-border);
+  color: #fff;
+}
+
+.grain { position: relative; isolation: isolate; }
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background-image: var(--grain);
+  background-size: 220px 220px;
+  opacity: 0.06;
+  border-radius: inherit;
+}
+
+/* Edge-faded strip used by marquees and pill rows. */
+.edge-fade {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* ==========================================================================
+   Pill buttons
+   ========================================================================== */
+.pill {
+  --pill-fill: var(--color-ink);
+  --pill-hover-text: #fff;
+  --pill-dot: #fff;
+  --pill-dot-ink: var(--color-ink);
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 24px;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1px currentColor;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: color 0.3s var(--ease-cubic), box-shadow 0.3s var(--ease-cubic);
+}
+.pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--pill-fill);
+  border-radius: inherit;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.3s var(--ease-cubic);
+}
+.pill__dot {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  margin: -12px -14px -12px -4px;
+  border-radius: 50%;
+  background: currentColor;
+  display: grid;
+  place-items: center;
+  transform: scale(0.17);
+  transition: transform 0.3s var(--ease-cubic), background 0.3s var(--ease-cubic);
+}
+.pill__dot svg {
+  width: 14px;
+  height: 14px;
+  color: var(--pill-dot-ink);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s var(--ease-cubic), transform 0.3s var(--ease-cubic);
+}
+@media (hover: hover) {
+  .pill:not(:disabled):hover::after { transform: scaleY(1); }
+  .pill:not(:disabled):hover { color: var(--pill-hover-text); box-shadow: inset 0 0 0 1px var(--pill-fill); }
+  .pill:not(:disabled):hover .pill__dot { transform: scale(1); background: var(--pill-dot); }
+  .pill:not(:disabled):hover .pill__dot svg { opacity: 1; transform: none; }
+}
+.pill:focus-visible::after { transform: scaleY(1); }
+.pill:focus-visible { color: var(--pill-hover-text); }
+.pill:focus-visible .pill__dot { transform: scale(1); background: var(--pill-dot); }
+.pill:focus-visible .pill__dot svg { opacity: 1; transform: none; }
+
+.pill--solid {
+  background: var(--color-ink);
+  color: #fff;
+  box-shadow: none;
+  --pill-fill: var(--accent);
+  --pill-hover-text: var(--on-accent, var(--color-ink));
+  --pill-dot: var(--color-ink);
+  --pill-dot-ink: #fff;
+}
+.pill--accent {
+  background: var(--accent);
+  color: var(--on-accent, var(--color-ink));
+  box-shadow: none;
+  --pill-fill: var(--color-ink);
+  --pill-hover-text: #fff;
+}
+.pill--zine {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--color-ink);
+  border-radius: var(--radius-zine);
+  box-shadow: none;
+  --pill-fill: var(--accent);
+  --pill-hover-text: var(--on-accent, var(--color-ink));
+  --pill-dot: var(--color-ink);
+  --pill-dot-ink: #fff;
+}
+.pill--light { color: #fff; --pill-fill: #fff; --pill-hover-text: var(--color-ink); --pill-dot: var(--color-ink); --pill-dot-ink: #fff; }
+.pill--sm { padding: 12px 16px; font-size: 12px; gap: 10px; }
+.pill--sm .pill__dot { width: 28px; height: 28px; margin: -8px -10px -8px -4px; }
+.pill--block { width: 100%; }
+.pill:disabled { opacity: 0.45; }
+
+/* Outline tag pills (non-interactive). */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1px var(--color-line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Underline that grows from the left. */
+.u-grow {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size 0.3s var(--ease-cubic);
+  padding-bottom: 2px;
+}
+.u-grow:hover, .u-grow:focus-visible, .u-grow[aria-current='true'] { background-size: 100% 1px; }
+
+/* ==========================================================================
+   Reveal helpers (JS adds classes; content stays visible without JS)
+   ========================================================================== */
+.js [data-split]:not(.is-split) { visibility: hidden; }
+.reduced [data-split] { visibility: visible !important; }
+.split-line { padding-bottom: 0.06em; margin-bottom: -0.06em; }
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.badge--ink { background: var(--color-ink); color: #fff; }
+.badge--accent { background: var(--accent); color: var(--on-accent, var(--color-ink)); }
+.stamp {
+  font-family: var(--font-gothic);
+  color: var(--color-seconds-red);
+  border: 2px solid var(--color-seconds-red);
+  border-radius: 6px;
+  padding: 4px 12px 6px;
+  transform: rotate(-8deg);
+  font-size: 22px;
+  line-height: 1;
+  background: rgba(241, 241, 241, 0.85);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Custom cursor: native cursor hidden only where ours is running.
+   ========================================================================== */
+.has-cursor, .has-cursor * { cursor: none !important; }
+.has-cursor input, .has-cursor textarea { cursor: text !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Spec table (watch-reference style)
+   ========================================================================== */
+.spec { display: grid; border-top: 1px solid currentColor; border-color: color-mix(in srgb, currentColor 25%, transparent); }
+.spec__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 38%) 1fr;
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+}
+.spec__row dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+.spec__row dd { font-size: 14px; text-transform: uppercase; letter-spacing: 0.01em; }
+.spec--compact .spec__row { padding: 9px 0; }
+.spec--compact .spec__row dd { font-size: 13px; }

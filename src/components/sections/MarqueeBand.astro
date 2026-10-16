@@ -1,0 +1,20 @@
+---
+import Marquee from '../ui/Marquee.astro';
+---
+
+<section class="band grain" aria-label="Everything but the watch">
+  <Marquee text="Everything but the watch — " size="xl" duration={35} />
+</section>
+
+<style>
+  .band {
+    position: relative;
+    z-index: 2;
+    margin-top: calc(var(--gutter) * -2);
+    background: var(--color-black);
+    color: #fff;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    padding: clamp(20px, 3vw, 40px) 0 clamp(16px, 2.4vw, 32px);
+    overflow: hidden;
+  }
+</style>

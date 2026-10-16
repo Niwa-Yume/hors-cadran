@@ -1,0 +1,148 @@
+---
+import PillButton from '../ui/PillButton.astro';
+
+const indices = Array.from({ length: 12 }, (_, i) => {
+  const a = (i * 30 * Math.PI) / 180;
+  const major = i % 3 === 0;
+  return {
+    x1: 100 + Math.sin(a) * 88,
+    y1: 100 - Math.cos(a) * 88,
+    x2: 100 + Math.sin(a) * (major ? 72 : 78),
+    y2: 100 - Math.cos(a) * (major ? 72 : 78),
+    major,
+  };
+});
+---
+
+<section class="watching" id="alert" aria-labelledby="watching-title">
+  <div class="watching__inner">
+    <div class="watching__dials" aria-hidden="true">
+      {
+        [0, 1].map(() => (
+          <svg class="wdial" viewBox="0 0 200 200" data-wdial>
+            <circle cx="100" cy="100" r="98" fill="#fff" stroke="#111" stroke-width="1.5" />
+            {indices.map((t) => (
+              <line x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke="#111" stroke-width={t.major ? 5 : 3} />
+            ))}
+            <g data-hand="hour">
+              <rect x="96" y="48" width="8" height="58" rx="2" fill="#111" />
+            </g>
+            <g data-hand="minute">
+              <rect x="97.5" y="24" width="5" height="82" rx="2" fill="#111" />
+            </g>
+            <g data-hand="second">
+              <line x1="100" y1="122" x2="100" y2="18" stroke="#CB4C3A" stroke-width="1.6" />
+              <circle cx="100" cy="100" r="4" fill="#CB4C3A" />
+            </g>
+          </svg>
+        ))
+      }
+    </div>
+
+    <h2 id="watching-title" class="display watching__title" data-split>You check the time. The time checks you.</h2>
+    <p class="watching__sub">Drops land without warning.</p>
+
+    <form class="alert-form" data-alert-form novalidate>
+      <label class="sr-only" for="alert-email">Email address</label>
+      <input id="alert-email" name="email" type="email" required autocomplete="email" placeholder="you@domain.ch" class="alert-form__input" />
+      <PillButton type="submit" variant="solid">Get the alert</PillButton>
+    </form>
+  </div>
+</section>
+
+<style>
+  .watching {
+    margin: var(--gutter);
+    background: var(--color-lume-lime);
+    color: var(--color-ink);
+    border-radius: 50% / clamp(48px, 9vw, 140px);
+    padding: clamp(96px, 12vw, 180px) 20px;
+    --focus: var(--color-ink);
+    --accent: var(--color-ink);
+  }
+  .watching__inner { max-width: 1100px; margin: 0 auto; display: grid; justify-items: center; text-align: center; gap: clamp(20px, 3vw, 32px); }
+  .watching__dials { display: flex; gap: clamp(16px, 4vw, 48px); margin-bottom: 8px; }
+  .wdial { width: clamp(140px, 22vw, 280px); height: auto; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.12)); }
+  .watching__title { font-size: clamp(44px, 7.4vw, 120px); max-width: 14ch; }
+  .watching__sub { font-size: 17px; }
+
+  .alert-form { display: flex; flex-wrap: wrap; justify-content: center; align-items: end; gap: 16px 20px; width: min(560px, 100%); margin-top: 8px; }
+  .alert-form__input {
+    flex: 1 1 240px;
+    background: transparent;
+    border: 0;
+    border-bottom: 1.5px solid var(--color-ink);
+    padding: 12px 2px;
+    font-size: 16px;
+    border-radius: 0;
+  }
+  .alert-form__input::placeholder { color: rgba(17, 17, 17, 0.5); }
+  .alert-form__input:focus-visible { outline: none; border-bottom-width: 3px; }
+  .alert-form__input[aria-invalid='true'] { border-color: var(--color-seconds-red); }
+</style>
+
+<script>
+  import { gsap } from '../../scripts/gsap';
+  import { emit } from '../../scripts/events';
+  import { mouse, watchVisibility } from '../../scripts/env';
+
+  const section = document.getElementById('alert')!;
+  const dials = [...section.querySelectorAll<SVGSVGElement>('[data-wdial]')];
+  const ORIGIN = '100 100';
+
+  const hands = dials.map((svg) => ({
+    svg,
+    hour: svg.querySelector<SVGGElement>('[data-hand="hour"]')!,
+    minute: svg.querySelector<SVGGElement>('[data-hand="minute"]')!,
+    second: svg.querySelector<SVGGElement>('[data-hand="second"]')!,
+  }));
+
+  /* Until the cursor shows up (or on touch), the dials tell the real time. */
+  const now = new Date();
+  hands.forEach((h) => {
+    gsap.set(h.hour, { svgOrigin: ORIGIN, rotation: (now.getHours() % 12) * 30 + now.getMinutes() * 0.5 });
+    gsap.set(h.minute, { svgOrigin: ORIGIN, rotation: now.getMinutes() * 6 });
+    gsap.set(h.second, { svgOrigin: ORIGIN, rotation: now.getSeconds() * 6 });
+  });
+
+  /* Seconds hand: dead-beat, one jump per second. */
+  const beat = () => {
+    const s = new Date().getSeconds();
+    hands.forEach((h) => gsap.to(h.second, { rotation: `${s * 6}_cw`, svgOrigin: ORIGIN, duration: 0.12, ease: 'back.out(4)' }));
+    window.setTimeout(beat, 1000 - (Date.now() % 1000));
+  };
+  beat();
+
+  /* Hour + minute hands look at the cursor; the hour hand lags slightly. */
+  const vis = watchVisibility(section, undefined, '100px');
+  window.addEventListener(
+    'pointermove',
+    () => {
+      if (!vis.visible || !mouse.moved) return;
+      hands.forEach((h) => {
+        const r = h.svg.getBoundingClientRect();
+        const deg = (Math.atan2(mouse.x - (r.left + r.width / 2), -(mouse.y - (r.top + r.height / 2))) * 180) / Math.PI;
+        gsap.to(h.minute, { rotation: `${deg}_short`, svgOrigin: ORIGIN, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
+        gsap.to(h.hour, { rotation: `${deg}_short`, svgOrigin: ORIGIN, duration: 0.5, ease: 'power2.out', overwrite: true });
+      });
+    },
+    { passive: true },
+  );
+
+  /* Front-only alert form. */
+  document.querySelectorAll<HTMLFormElement>('[data-alert-form]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = form.querySelector<HTMLInputElement>('input[type="email"]')!;
+      if (!input.checkValidity()) {
+        input.setAttribute('aria-invalid', 'true');
+        emit('hc:toast', { message: 'That email looks like a quartz movement. Try again.' });
+        input.focus();
+        return;
+      }
+      input.removeAttribute('aria-invalid');
+      form.reset();
+      emit('hc:toast', { message: "You're on the list (demo)" });
+    });
+  });
+</script>

@@ -1,0 +1,47 @@
+<div class="toast glass-dark" data-toast popover="manual" role="status" aria-live="polite"></div>
+
+<style>
+  .toast {
+    position: fixed;
+    inset: auto 0 24px 0;
+    margin: 0 auto;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    padding: 14px 22px;
+    border-radius: 9999px;
+    font-size: 14px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.3s var(--ease-cubic), transform 0.6s var(--ease-expo);
+  }
+  .toast.is-on { opacity: 1; transform: none; }
+  .toast:not(:popover-open):not(.is-fallback) { display: none; }
+</style>
+
+<script>
+  import { on } from '../../scripts/events';
+
+  const el = document.querySelector<HTMLElement>('[data-toast]');
+  let hideTimer = 0;
+  if (el) {
+    const supportsPopover = typeof el.showPopover === 'function';
+    if (!supportsPopover) el.classList.add('is-fallback');
+    on('hc:toast', (d) => {
+      if (!d) return;
+      el.textContent = d.message;
+      window.clearTimeout(hideTimer);
+      if (supportsPopover) {
+        // Re-show to move the toast to the top of the top layer (above open dialogs).
+        if (el.matches(':popover-open')) el.hidePopover();
+        el.showPopover();
+      }
+      el.classList.remove('is-on');
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-on')));
+      hideTimer = window.setTimeout(() => {
+        el.classList.remove('is-on');
+        window.setTimeout(() => supportsPopover && el.matches(':popover-open') && el.hidePopover(), 350);
+      }, 2500);
+    });
+  }
+</script>

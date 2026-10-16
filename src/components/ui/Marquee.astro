@@ -1,0 +1,60 @@
+---
+interface Props {
+  text: string;
+  size?: 'xl' | 'md';
+  /** Seconds per loop. */
+  duration?: number;
+  repeat?: number;
+  class?: string;
+}
+const { text, size = 'xl', duration = 35, repeat = 4, class: className } = Astro.props;
+const items = Array.from({ length: repeat });
+---
+
+<div class:list={['marquee edge-fade', `marquee--${size}`, className]} data-marquee data-duration={duration}>
+  <p class="sr-only">{text.replace(/[—\s]+$/, '')}</p>
+  <div class="marquee__track" data-marquee-track aria-hidden="true">
+    {[0, 1].map(() => (
+      <div class="marquee__half">
+        {items.map(() => <span class="display marquee__item">{text}&nbsp;</span>)}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .marquee { overflow: hidden; width: 100%; }
+  .marquee__track { display: flex; width: max-content; will-change: transform; }
+  .marquee__half { display: flex; flex: none; }
+  .marquee__item { white-space: nowrap; padding-block: 0.08em 0.02em; }
+  .marquee--xl .marquee__item { font-size: clamp(56px, 11vw, 180px); }
+  .marquee--md .marquee__item { font-size: clamp(40px, 6vw, 96px); }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger } from '../../scripts/gsap';
+  import { reduced } from '../../scripts/env';
+
+  /* Infinite translateX loop; direction follows scroll direction. */
+  document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
+    if (reduced) return;
+    const track = el.querySelector<HTMLElement>('[data-marquee-track]')!;
+    const duration = Number(el.dataset.duration) || 35;
+    const tween = gsap.to(track, { xPercent: -50, duration, ease: 'none', repeat: -1 });
+    // Park the playhead deep into the repeats so playing in reverse never hits 0.
+    tween.totalTime(duration * 1000);
+    let dir = 1;
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top bottom',
+      end: 'bottom top',
+      onToggle: (self) => (self.isActive ? tween.resume() : tween.pause()),
+      onUpdate: (self) => {
+        if (self.direction !== dir) {
+          dir = self.direction;
+          gsap.to(tween, { timeScale: dir, duration: 0.6, ease: 'hc-cubic', overwrite: true });
+        }
+      },
+    });
+  });
+</script>

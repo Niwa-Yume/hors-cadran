@@ -1,0 +1,239 @@
+---
+import { BRAND_NAME, CONTACT } from '../../data/brand';
+
+const links = [
+  { label: 'Shop', href: '#shop' },
+  { label: 'Categories', href: '#categories' },
+  { label: 'Drops', href: '#drops' },
+  { label: 'About', href: '#about' },
+];
+---
+
+<header class="nav" data-nav>
+  <nav class="nav__pill" aria-label="Main">
+    <a href="#top" class="gothic nav__brand">{BRAND_NAME}</a>
+    <ul class="nav__links">
+      {links.map((l) => (
+        <li><a href={l.href} class="display nav__link u-grow">{l.label}</a></li>
+      ))}
+      <li>
+        <button type="button" class="display nav__link u-grow" data-cart-open aria-haspopup="dialog">
+          Cart (<span data-cart-count>0</span>)
+        </button>
+      </li>
+    </ul>
+    <div class="mono nav__lang" role="group" aria-label="Language (visual only)">
+      <button type="button" aria-pressed="false" data-lang>FR</button>
+      <span aria-hidden="true">/</span>
+      <button type="button" aria-pressed="true" data-lang>EN</button>
+    </div>
+    <button type="button" class="display nav__cart-sm" data-cart-open aria-label="Open cart">
+      (<span data-cart-count>0</span>)
+    </button>
+    <button
+      type="button"
+      class="nav__burger"
+      aria-expanded="false"
+      aria-controls="menu-panel"
+      aria-label="Open menu"
+      data-burger
+    >
+      <span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<div class="menu" id="menu-panel" data-menu inert>
+  <ul class="menu__links">
+    {links.map((l) => (
+      <li><a href={l.href} class="display menu__link" data-menu-link>{l.label}</a></li>
+    ))}
+    <li>
+      <button type="button" class="display menu__link" data-cart-open data-menu-link>
+        Cart (<span data-cart-count>0</span>)
+      </button>
+    </li>
+  </ul>
+  <div class="menu__foot mono">
+    <span>
+      <a href={CONTACT.socials[0].href} target="_blank" rel="noopener">Instagram</a>
+      <span aria-hidden="true">·</span>
+      <a href={`mailto:${CONTACT.email}`}>Email</a>
+    </span>
+    <span>
+      <button type="button" aria-pressed="false" data-lang>FR</button>
+      <button type="button" aria-pressed="true" data-lang>EN</button>
+    </span>
+  </div>
+</div>
+
+<style>
+  .nav {
+    position: fixed;
+    top: var(--nav-top);
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    padding-inline: 16px;
+  }
+  .nav__pill {
+    pointer-events: auto;
+    height: var(--nav-h);
+    padding: 0 24px;
+    border-radius: 9999px;
+    background: var(--color-ink);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    --focus: var(--color-lume-lime);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  }
+  .nav__brand { font-size: 26px; line-height: 1; padding-top: 2px; white-space: nowrap; }
+  .nav__links { display: none; gap: 22px; align-items: center; }
+  .nav__link { font-size: 16px; line-height: 1; letter-spacing: 0.01em; }
+  .nav__lang { display: none; font-size: 11px; color: var(--color-mute); gap: 4px; align-items: center; }
+  .nav__lang button[aria-pressed='true'], .menu__foot button[aria-pressed='true'] { color: currentColor; }
+  .nav__lang button[aria-pressed='true'] { color: #fff; }
+  .nav__cart-sm { font-size: 18px; line-height: 1; margin-left: auto; }
+
+  .nav__burger {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    margin-right: -6px;
+  }
+  .nav__burger span {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    height: 1.5px;
+    background: #fff;
+    transition: transform 0.6s var(--ease-expo);
+  }
+  .nav__burger span:first-child { top: 12px; }
+  .nav__burger span:last-child { top: 19px; }
+  .nav__burger[aria-expanded='true'] span:first-child { transform: translateY(3.5px) rotate(45deg); }
+  .nav__burger[aria-expanded='true'] span:last-child { transform: translateY(-3.5px) rotate(-45deg); }
+
+  @media (max-width: 1023px) {
+    .nav { justify-content: stretch; }
+    .nav__pill { width: 100%; gap: 16px; }
+  }
+  @media (min-width: 1024px) {
+    .nav__links, .nav__lang { display: flex; }
+    .nav__burger, .nav__cart-sm { display: none; }
+  }
+
+  /* Mobile / tablet menu panel */
+  .menu {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 90;
+    width: 100vw;
+    background: var(--color-white);
+    padding: calc(var(--nav-top) + var(--nav-h) + 40px) 24px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.6s var(--ease-expo), visibility 0s linear 0.6s;
+  }
+  @media (min-width: 768px) { .menu { width: 50vw; } }
+  .menu.is-open { transform: none; visibility: visible; transition: transform 0.6s var(--ease-expo); }
+  .menu__links { display: grid; justify-items: end; gap: 4px; }
+  .menu__link {
+    display: block;
+    font-size: clamp(56px, 15vw, 112px);
+    color: var(--color-mute);
+    text-align: right;
+    transition: color 0.3s var(--ease-cubic);
+  }
+  .menu__link:hover, .menu__link:focus-visible, .menu__link[aria-current='true'] { color: var(--color-ink); }
+  .menu__foot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-line);
+    color: var(--color-mute);
+  }
+  .menu__foot a { color: var(--color-ink); }
+  .menu__foot button { margin-left: 8px; }
+  .menu__foot button[aria-pressed='true'] { color: var(--color-ink); }
+</style>
+
+<script>
+  import { lockScroll } from '../../scripts/lenis';
+  import { onPreloaded } from '../../scripts/events';
+  import { gsap } from '../../scripts/gsap';
+  import { reduced } from '../../scripts/env';
+
+  const nav = document.querySelector<HTMLElement>('[data-nav]')!;
+  const burger = document.querySelector<HTMLButtonElement>('[data-burger]')!;
+  const menu = document.querySelector<HTMLElement>('[data-menu]')!;
+  const main = document.getElementById('main');
+  const footer = document.querySelector('footer');
+
+  if (!reduced && !document.documentElement.classList.contains('no-preloader')) {
+    gsap.set(nav, { yPercent: -180 });
+    onPreloaded(() => gsap.to(nav, { yPercent: 0, duration: 0.9, ease: 'hc-expo', delay: 0.1 }));
+  }
+
+  let open = false;
+  const setOpen = (next: boolean) => {
+    if (open === next) return;
+    open = next;
+    menu.classList.toggle('is-open', open);
+    menu.inert = !open;
+    burger.setAttribute('aria-expanded', String(open));
+    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    lockScroll(open);
+    [main, footer].forEach((el) => el && ((el as HTMLElement).inert = open));
+    if (open) menu.querySelector<HTMLElement>('[data-menu-link]')?.focus({ preventScroll: true });
+  };
+  burger.addEventListener('click', () => setOpen(!open));
+  menu.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('[data-menu-link]')) setOpen(false);
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && open) {
+      setOpen(false);
+      burger.focus();
+    }
+  });
+  matchMedia('(min-width: 1024px)').addEventListener('change', (e) => e.matches && setOpen(false));
+
+  /* FR / EN: visual toggle only. */
+  document.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-lang]');
+    if (!b) return;
+    const lang = b.textContent?.trim();
+    document.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach((x) =>
+      x.setAttribute('aria-pressed', String(x.textContent?.trim() === lang)),
+    );
+  });
+
+  /* Menu scrollspy: the section in view gets the ink colour. */
+  const sections = ['#shop', '#categories', '#drops', '#about']
+    .map((id) => document.querySelector<HTMLElement>(id))
+    .filter(Boolean) as HTMLElement[];
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        const id = `#${en.target.id}`;
+        document.querySelectorAll<HTMLAnchorElement>('[data-menu-link], .nav__link').forEach((a) => {
+          if (a.getAttribute('href')) a.setAttribute('aria-current', String(a.getAttribute('href') === id));
+        });
+      });
+    },
+    { rootMargin: '-45% 0px -50% 0px' },
+  );
+  sections.forEach((s) => io.observe(s));
+</script>

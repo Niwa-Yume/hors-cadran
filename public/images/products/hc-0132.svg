@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+<defs><radialGradient id="hc-0132-sh"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="500" cy="760" rx="380" ry="30" fill="url(#hc-0132-sh)"/>
+<defs>
+<linearGradient id="hc-0132-sheen" gradientTransform="rotate(90 .5 .5)">
+<stop offset="0" stop-color="#fff" stop-opacity=".22"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+<stop offset="1" stop-color="#000" stop-opacity=".18"/>
+</linearGradient></defs>
+<polygon points="160,640 840,640 840,688 160,688" fill="#6C4327"/>
+<polygon points="230,430 770,430 840,640 160,640" fill="#8B5A35"/>
+<polygon points="285,468 715,468 772,606 228,606" fill="#A5714A"/>
+<polygon points="285,468 715,468 772,606 228,606" fill="url(#hc-0132-sheen)"/>
+<polygon points="230,430 285,468 228,606 160,640" fill="#7A4D2D"/>
+<polygon points="770,430 840,640 772,606 715,468" fill="#7A4D2D"/>
+<path d="M240 442 H760 L826 632 H174 Z" fill="none" stroke="#E2C79F" stroke-width="3" stroke-dasharray="9 8" stroke-linecap="round" opacity=".8"/>
+<circle cx="232" cy="432" r="11" fill="#C7CBCF"/><circle cx="768" cy="432" r="11" fill="#C7CBCF"/>
+<circle cx="162" cy="640" r="12" fill="#C7CBCF"/><circle cx="838" cy="640" r="12" fill="#C7CBCF"/></svg>

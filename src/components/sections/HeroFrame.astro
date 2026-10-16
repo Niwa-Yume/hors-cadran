@@ -1,0 +1,405 @@
+---
+import { BRAND_NAME, SUBLINE, TAGLINE } from '../../data/brand';
+import { DROPS, dropAccent, productById } from '../../data/products';
+
+const first = DROPS[0];
+const accent = dropAccent(first);
+const onAccent = '#111111';
+const pad = (n: number) => String(n).padStart(2, '0');
+const OFFSETS = [-3, -2, -1, 0, 1, 2, 3];
+const n = DROPS.length;
+---
+
+<section class="hero" id="drops" aria-labelledby="hero-title">
+  <h1 id="hero-title" class="sr-only">{BRAND_NAME} — {TAGLINE} {SUBLINE}</h1>
+  <div class="hero__frame grain" data-hero style={`--accent:${accent};--on-accent:${onAccent}`}>
+    <div class="hero__media" data-hero-media>
+      {
+        DROPS.map((d, i) => (
+          <img
+            src={d.image}
+            alt={i === 0 ? d.alt : ''}
+            class:list={['hero__img', i === 0 && 'is-active']}
+            width="1600"
+            height="1000"
+            loading={i === 0 ? 'eager' : 'lazy'}
+            fetchpriority={i === 0 ? 'high' : 'low'}
+            decoding={i === 0 ? 'sync' : 'async'}
+            data-hero-img
+          />
+        ))
+      }
+    </div>
+    <div class="hero__gl" data-hero-gl aria-hidden="true"></div>
+    <div class="hero__shade" aria-hidden="true"></div>
+    <div class="hero__wipe" data-hero-wipe aria-hidden="true"></div>
+
+    <div class="hero__picker" data-picker data-lenis-prevent data-cursor="drag" role="group" aria-label="Drops" aria-roledescription="wheel picker">
+      <div class="hero__wheel" data-wheel>
+        {
+          OFFSETS.map((k) => {
+            const d = DROPS[((k % n) + n) % n];
+            return (
+              <button type="button" class="display hero__row" data-row={k} tabindex={k === 0 ? 0 : -1}>
+                {d.title}
+              </button>
+            );
+          })
+        }
+      </div>
+    </div>
+
+    <button type="button" class="display hero__cta" data-hero-cta data-quickview={first.productId}>
+      View drop
+    </button>
+
+    <div class="hero__bottom">
+      <p class="hero__sub">{SUBLINE}</p>
+      <p class="mono hero__meta" data-hero-meta aria-live="polite">
+        DROP {first.number} — {pad(first.pieces)} PIECES — {first.city.toUpperCase()}
+      </p>
+    </div>
+    <p class="mono hero__clock" aria-label="Time on page"><span data-hero-clock>00:00:00</span></p>
+    <p class="sr-only" data-hero-current aria-live="polite">{productById(first.productId)?.title}</p>
+  </div>
+</section>
+
+<style>
+  .hero { padding: var(--gutter); }
+  .hero__frame {
+    position: relative;
+    height: calc(100svh - 2 * var(--gutter));
+    min-height: 520px;
+    border-radius: var(--radius-frame);
+    overflow: hidden;
+    background: #0d0f0c;
+    color: #fff;
+    --focus: var(--accent);
+  }
+  .hero__media, .hero__gl, .hero__shade, .hero__wipe { position: absolute; inset: 0; }
+  .hero__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s var(--ease-cubic);
+  }
+  .hero__img.is-active { opacity: 1; }
+  .hero__gl { opacity: 0; transition: opacity 0.8s var(--ease-cubic); }
+  .hero__gl :global(canvas) { display: block; width: 100% !important; height: 100% !important; }
+  .hero__frame:global(.is-gl) .hero__gl { opacity: 1; }
+  .hero__frame:global(.is-gl) .hero__media { opacity: 0; transition: opacity 0.8s var(--ease-cubic) 0.2s; }
+  .hero__shade {
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.45), transparent 38%),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.45), transparent 30%);
+  }
+  .hero__wipe {
+    pointer-events: none;
+    width: 46%;
+    z-index: 4;
+    background: linear-gradient(100deg, #8c8c8c, #f4f4f4 45%, #a6a6a6 55%, #7a7a7a);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 35%, #000 65%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 35%, #000 65%, transparent);
+    transform: translateX(-110%);
+    opacity: 0.85;
+  }
+
+  /* Wheel picker */
+  .hero__picker {
+    --row: 34px;
+    position: absolute;
+    left: clamp(16px, 3vw, 40px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 6;
+    height: calc(var(--row) * 5);
+    width: min(46vw, 420px);
+    touch-action: none;
+    user-select: none;
+  }
+  .hero__wheel { position: relative; height: 100%; }
+  .hero__row {
+    position: absolute;
+    left: 0;
+    top: calc(50% - var(--row) / 2);
+    height: var(--row);
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--accent);
+    white-space: nowrap;
+    text-align: left;
+    will-change: transform, opacity;
+    transition: color 0.6s var(--ease-cubic);
+  }
+  .hero__row[data-row='-3'], .hero__row[data-row='3'] { opacity: 0; }
+  .hero__row[data-row='-2'], .hero__row[data-row='2'] { opacity: 0.25; filter: blur(1px); }
+  .hero__row[data-row='-1'], .hero__row[data-row='1'] { opacity: 0.55; }
+  .hero__row[data-row='-3'] { transform: translateY(calc(var(--row) * -3)); }
+  .hero__row[data-row='-2'] { transform: translateY(calc(var(--row) * -2)); }
+  .hero__row[data-row='-1'] { transform: translateY(calc(var(--row) * -1)); }
+  .hero__row[data-row='1'] { transform: translateY(var(--row)); }
+  .hero__row[data-row='2'] { transform: translateY(calc(var(--row) * 2)); }
+  .hero__row[data-row='3'] { transform: translateY(calc(var(--row) * 3)); }
+
+  .hero__cta {
+    position: absolute;
+    z-index: 6;
+    right: clamp(16px, 3vw, 40px);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 18px 26px 16px;
+    font-size: 20px;
+    background: var(--accent);
+    color: var(--on-accent);
+    border-radius: 0;
+    transition: background-color 0.6s var(--ease-cubic), color 0.3s var(--ease-cubic), box-shadow 0.3s var(--ease-cubic);
+  }
+  .hero__cta:hover { box-shadow: inset 0 0 0 2px var(--color-ink); }
+
+  .hero__bottom {
+    position: absolute;
+    left: clamp(16px, 3vw, 40px);
+    bottom: clamp(16px, 3vw, 32px);
+    z-index: 6;
+    display: grid;
+    gap: 8px;
+    max-width: 60%;
+  }
+  .hero__sub { font-size: 15px; opacity: 0.85; }
+  .hero__meta, .hero__clock { font-size: 12px; letter-spacing: 0.04em; }
+  .hero__clock {
+    position: absolute;
+    right: clamp(16px, 3vw, 40px);
+    bottom: clamp(16px, 3vw, 32px);
+    z-index: 6;
+  }
+
+  @media (max-width: 767px) {
+    .hero__picker { --row: 30px; top: 42%; width: calc(100% - 32px); }
+    .hero__row { font-size: 22px; }
+    .hero__cta { top: auto; transform: none; bottom: 88px; left: 16px; right: auto; font-size: 18px; }
+    .hero__bottom { max-width: calc(100% - 120px); }
+    .hero__sub { display: none; }
+  }
+</style>
+
+<script>
+  import { gsap } from '../../scripts/gsap';
+  import { DROPS, dropAccent, productById } from '../../data/products';
+  import { reduced, mod, pad2, isDesktop, webglAvailable, whenIdle, watchVisibility } from '../../scripts/env';
+  import { emit, onPreloaded } from '../../scripts/events';
+
+  const frame = document.querySelector<HTMLElement>('[data-hero]')!;
+  const imgs = [...frame.querySelectorAll<HTMLImageElement>('[data-hero-img]')];
+  const picker = frame.querySelector<HTMLElement>('[data-picker]')!;
+  const rows = [...frame.querySelectorAll<HTMLButtonElement>('.hero__row')];
+  const wipe = frame.querySelector<HTMLElement>('[data-hero-wipe]')!;
+  const cta = frame.querySelector<HTMLButtonElement>('[data-hero-cta]')!;
+  const meta = frame.querySelector<HTMLElement>('[data-hero-meta]')!;
+  const current = frame.querySelector<HTMLElement>('[data-hero-current]')!;
+  const clock = frame.querySelector<HTMLElement>('[data-hero-clock]')!;
+  const n = DROPS.length;
+
+  /* ---------- Wheel picker: continuous position p, rows rendered around it ---------- */
+  const state = { p: 0 };
+  let target = 0;
+  let active = 0;
+
+  const rowH = () => parseFloat(getComputedStyle(picker).getPropertyValue('--row')) || 34;
+  const lerpStops = (d: number, stops: number[]) => {
+    const i = Math.min(Math.floor(d), stops.length - 2);
+    const t = Math.min(1, d - i);
+    return stops[i] + (stops[i + 1] - stops[i]) * t;
+  };
+
+  const render = () => {
+    const base = Math.floor(state.p);
+    const frac = state.p - base;
+    const h = rowH();
+    rows.forEach((row, idx) => {
+      const k = idx - 3;
+      const offset = k - frac;
+      const dist = Math.abs(offset);
+      const d = DROPS[mod(base + k, n)];
+      if (row.textContent !== d.title) row.textContent = d.title;
+      row.dataset.index = String(base + k);
+      row.style.transform = `translateY(${offset * h}px)`;
+      row.style.opacity = String(lerpStops(Math.min(dist, 3), [1, 0.55, 0.25, 0]));
+      row.style.filter = dist > 1 ? `blur(${Math.min(1, dist - 1).toFixed(2)}px)` : 'none';
+      const isCenter = Math.round(offset) === 0;
+      row.tabIndex = isCenter ? 0 : -1;
+      row.setAttribute('aria-current', String(isCenter));
+      row.setAttribute('aria-label', `Drop ${d.number}: ${d.title}`);
+    });
+  };
+
+  const setActive = (i: number, animate = true) => {
+    const prev = active;
+    active = mod(i, n);
+    if (prev === active && animate) return;
+    const d = DROPS[active];
+    const accent = dropAccent(d);
+    frame.style.setProperty('--accent', accent);
+    imgs.forEach((img, j) => img.classList.toggle('is-active', j === active));
+    if (imgs[active].loading === 'lazy') imgs[active].loading = 'eager';
+    imgs.forEach((img, j) => (img.alt = j === active ? d.alt : ''));
+    meta.textContent = `DROP ${d.number} — ${pad2(d.pieces)} PIECES — ${d.city.toUpperCase()}`;
+    cta.dataset.quickview = d.productId;
+    current.textContent = productById(d.productId)?.title ?? '';
+    emit('hc:drop', { index: active, accent });
+    if (animate && !reduced) {
+      gsap.fromTo(
+        wipe,
+        { xPercent: -110 },
+        { xPercent: (frame.clientWidth / wipe.clientWidth) * 100 + 10, duration: 0.8, ease: 'hc-expo' },
+      );
+    }
+  };
+
+  const goTo = (t: number) => {
+    target = t;
+    setActive(t);
+    if (reduced) {
+      state.p = t;
+      render();
+      return;
+    }
+    gsap.to(state, { p: t, duration: 0.8, ease: 'hc-expo', onUpdate: render, overwrite: true });
+  };
+
+  rows.forEach((row) =>
+    row.addEventListener('click', () => {
+      if (dragMoved) return;
+      const idx = Number(row.dataset.index);
+      if (idx !== target) goTo(idx);
+    }),
+  );
+
+  picker.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      goTo(target + 1);
+      focusCenter();
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goTo(target - 1);
+      focusCenter();
+    }
+  });
+  const focusCenter = () => requestAnimationFrame(() => rows[3].focus({ preventScroll: true }));
+
+  /* Wheel */
+  let wheelAcc = 0;
+  let wheelLock = 0;
+  picker.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      wheelAcc += e.deltaY;
+      const now = performance.now();
+      if (Math.abs(wheelAcc) > 30 && now > wheelLock) {
+        goTo(target + Math.sign(wheelAcc));
+        wheelAcc = 0;
+        wheelLock = now + 450;
+      }
+    },
+    { passive: false },
+  );
+
+  /* Drag */
+  let dragStart = 0;
+  let dragFrom = 0;
+  let dragging = false;
+  let dragMoved = false;
+  picker.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    dragMoved = false;
+    dragStart = e.clientY;
+    dragFrom = state.p;
+    gsap.killTweensOf(state);
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dy = e.clientY - dragStart;
+    if (Math.abs(dy) > 4 && !dragMoved) {
+      dragMoved = true;
+      picker.setPointerCapture?.(e.pointerId);
+    }
+    if (!dragMoved) return;
+    state.p = dragFrom - dy / rowH();
+    render();
+  });
+  window.addEventListener('pointerup', () => {
+    if (!dragging) return;
+    dragging = false;
+    if (dragMoved) {
+      goTo(Math.round(state.p));
+      setTimeout(() => (dragMoved = false), 0);
+    }
+  });
+
+  /* Auto-advance every 5s; pauses on hover/focus/drag/off-screen. */
+  let hovering = false;
+  let focused = false;
+  picker.addEventListener('pointerenter', () => (hovering = true));
+  picker.addEventListener('pointerleave', () => (hovering = false));
+  frame.addEventListener('focusin', () => (focused = true));
+  frame.addEventListener('focusout', (e) => {
+    if (!frame.contains(e.relatedTarget as Node)) focused = false;
+  });
+  const vis = watchVisibility(frame);
+  if (!reduced) {
+    window.setInterval(() => {
+      if (hovering || focused || dragging || !vis.visible || document.hidden || !window.__hcPreloaded) return;
+      if (document.querySelector('dialog[open]')) return;
+      goTo(target + 1);
+    }, 5000);
+  }
+
+  /* Chronograph since page load. */
+  const t0 = Date.now();
+  const tickClock = () => {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    clock.textContent = `${pad2(Math.floor(s / 3600))}:${pad2(Math.floor(s / 60) % 60)}:${pad2(s % 60)}`;
+    window.setTimeout(tickClock, 1000 - ((Date.now() - t0) % 1000));
+  };
+  tickClock();
+
+  render();
+
+  /* Entrance after preloader */
+  if (!reduced) {
+    const fromPreloader = !document.documentElement.classList.contains('no-preloader');
+    if (fromPreloader) gsap.set([picker, cta], { opacity: 0 });
+    onPreloaded(() => {
+      gsap.fromTo(frame, { scale: 1.03 }, { scale: 1, duration: 1.2, ease: 'hc-expo' });
+      gsap.fromTo(picker, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.9, ease: 'hc-expo', delay: 0.15 });
+      gsap.fromTo(cta, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.9, ease: 'hc-expo', delay: 0.25 });
+    });
+  }
+
+  /* WebGL glass bezel: desktop + WebGL only, loaded when idle after first paint. */
+  if (isDesktop() && webglAvailable()) {
+    onPreloaded(() =>
+      whenIdle(async () => {
+        const container = frame.querySelector<HTMLElement>('[data-hero-gl]')!;
+        const { initHeroScene } = await import('../../scripts/three/hero-scene');
+        initHeroScene({
+          container,
+          frame,
+          images: DROPS.map((d) => d.image),
+          accents: DROPS.map((d) => dropAccent(d)),
+          initial: active,
+          staticMode: reduced,
+        });
+      }),
+    );
+  }
+</script>

@@ -1,0 +1,38 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'outline' | 'solid' | 'accent' | 'zine' | 'light';
+interface Props extends HTMLAttributes<'button'> {
+  href?: string;
+  variant?: Variant;
+  size?: 'md' | 'sm';
+  block?: boolean;
+}
+
+const { href, variant = 'outline', size = 'md', block = false, class: className, type = 'button', ...rest } = Astro.props;
+const classes = [
+  'pill',
+  variant !== 'outline' && `pill--${variant}`,
+  size === 'sm' && 'pill--sm',
+  block && 'pill--block',
+  className,
+];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...(rest as HTMLAttributes<'a'>)}>
+      <span><slot /></span>
+      <span class="pill__dot" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" /></svg>
+      </span>
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...rest}>
+      <span><slot /></span>
+      <span class="pill__dot" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" /></svg>
+      </span>
+    </button>
+  )
+}

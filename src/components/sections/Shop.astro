@@ -1,0 +1,317 @@
+---
+import { CATEGORIES, FEATURED_IDS, PRODUCTS, categoryById, formatCHF, productById } from '../../data/products';
+import PillButton from '../ui/PillButton.astro';
+
+const featured = FEATURED_IDS.map((id) => productById(id)!).filter(Boolean);
+const tabs = [
+  { id: 'all', label: 'All' },
+  { id: 'new', label: 'New' },
+  ...CATEGORIES.map((c) => ({ id: c.id, label: c.label })),
+];
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="shop" id="shop" aria-labelledby="shop-title">
+  <header class="shop__head">
+    <h2 id="shop-title" class="display shop__title" data-split>The inventory</h2>
+    <p class="mono shop__kicker">{pad(PRODUCTS.length)} objects. 00 watches.</p>
+  </header>
+
+  <div class="feat-grid">
+    {
+      featured.map((p) => {
+        const cat = categoryById(p.category);
+        return (
+          <article class="feat" style={`--accent:${cat.accent}`} data-feat>
+            <p class="mono feat__label">
+              <span aria-hidden="true">●</span> {p.maison} — {p.title}
+            </p>
+            <button type="button" class="feat__media" data-quickview={p.id} data-cursor="view" aria-label={`Quick view: ${p.title}, ${p.maison}`}>
+              <span class="feat__frame">
+                <img src={p.images[0]} alt="" width="1000" height="1000" loading="lazy" decoding="async" />
+              </span>
+            </button>
+            <p class="display feat__title" aria-hidden="true" data-feat-title>{p.title}</p>
+            <ul class="feat__tags" aria-label="Details">
+              <li class="tag">{cat.label}</li>
+              <li class="tag">{p.spec.year}</li>
+              <li class="tag">{p.spec.provenance}</li>
+              <li class="tag">{formatCHF(p.priceCHF)}</li>
+            </ul>
+          </article>
+        );
+      })
+    }
+  </div>
+
+  <div class="shop__tabs" data-shop-tabs>
+    <ul class="shop__tablist" aria-label="Filter by category">
+      {
+        tabs.map((t, i) => (
+          <li>
+            <button type="button" class="display shop__tab" data-filter={t.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+              {t.label}
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="shop__grid" id="shop-grid" data-shop-grid>
+    {
+      PRODUCTS.map((p) => {
+        const cat = categoryById(p.category);
+        const sold = p.status === 'sold_out';
+        return (
+          <article
+            class:list={['tile', sold && 'is-sold']}
+            style={`--accent:${cat.accent};--on-accent:${cat.onAccent}`}
+            data-tile
+            data-category={p.category}
+            data-new={String(p.isNew)}
+          >
+            <div class="tile__media">
+              <img src={p.images[0]} alt={`${p.title}, ${p.maison}`} width="1000" height="1000" loading="lazy" decoding="async" />
+              <div class="tile__badges">
+                {p.status === 'one_of_one' && <span class="badge badge--ink">One of one</span>}
+                {p.isNew && <span class="badge badge--accent">New</span>}
+              </div>
+              {sold && <span class="stamp tile__stamp">Sold out</span>}
+              <div class="tile__overlay" aria-hidden="true">
+                <p class="display tile__title">{p.title}</p>
+                <p class="mono tile__price">{formatCHF(p.priceCHF)}</p>
+              </div>
+            </div>
+            <button type="button" class="tile__open" data-quickview={p.id} data-cursor="view" aria-label={`Quick view: ${p.title}, ${p.maison}, ${formatCHF(p.priceCHF)}`} />
+            <div class="tile__add">
+              <PillButton variant="solid" size="sm" data-add={p.id} disabled={sold} aria-label={`Add ${p.title} to cart`}>
+                {sold ? 'Sold out' : 'Add to cart'}
+              </PillButton>
+            </div>
+            <div class="tile__info" aria-hidden="true">
+              <p class="mono tile__maison">{p.maison}</p>
+              <p class="display tile__title">{p.title}</p>
+              <p class="mono tile__price">{formatCHF(p.priceCHF)}</p>
+            </div>
+          </article>
+        );
+      })
+    }
+  </div>
+  <p class="shop__empty display" data-shop-empty hidden>Nothing here. Even the box sold out.</p>
+</section>
+
+<style>
+  .shop { background: var(--color-white); padding: clamp(80px, 10vw, 140px) var(--gutter) clamp(80px, 10vw, 140px); }
+  .shop__head { padding-inline: clamp(6px, 2vw, 30px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: clamp(32px, 4vw, 56px); }
+  .shop__title { font-size: clamp(56px, 11vw, 180px); }
+  .shop__kicker { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Featured */
+  .feat-grid { display: grid; gap: var(--gutter); grid-template-columns: 1fr; margin-bottom: clamp(64px, 8vw, 120px); }
+  @media (min-width: 768px) { .feat-grid { grid-template-columns: 1fr 1fr; } }
+  .feat { position: relative; display: grid; gap: 12px; }
+  .feat__label { font-size: 12px; text-transform: uppercase; }
+  .feat__label span { color: var(--accent); }
+  .feat__media { display: block; width: 100%; aspect-ratio: 4 / 5; border-radius: var(--radius-card); }
+  .feat__frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--color-paper);
+    transition: transform 0.7s var(--ease-expo);
+  }
+  .feat__frame img { width: 100%; height: 100%; object-fit: contain; padding: 12%; transition: transform 1s var(--ease-expo); }
+  @media (hover: hover) {
+    .feat:hover .feat__frame { transform: scale(0.95); }
+    .feat:hover .feat__frame img { transform: scale(1.1); }
+  }
+  .feat__media:focus-visible .feat__frame { transform: scale(0.95); }
+  .feat__title {
+    position: absolute;
+    left: 0;
+    top: 46%;
+    z-index: 3;
+    font-size: 9vw;
+    color: var(--accent);
+    white-space: nowrap;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .feat__title:global(.is-ready) { visibility: visible; }
+  @media (min-width: 768px) { .feat:nth-child(2) .feat__title { left: auto; right: 0; } }
+  .feat__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* Tabs */
+  .shop__tabs {
+    position: sticky;
+    top: calc(var(--nav-top) + var(--nav-h) + 10px);
+    z-index: 20;
+    background: var(--color-white);
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 12px calc(var(--gutter) + clamp(6px, 2vw, 30px));
+    border-bottom: 1px solid var(--color-line);
+    margin-bottom: var(--gutter);
+  }
+  .shop__tablist { display: flex; gap: clamp(16px, 2vw, 28px); overflow-x: auto; scrollbar-width: none; }
+  .shop__tablist::-webkit-scrollbar { display: none; }
+  .shop__tablist li { flex: none; }
+  .shop__tab {
+    font-size: clamp(18px, 1.8vw, 24px);
+    color: var(--color-mute);
+    padding: 6px 0 4px;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 2px;
+    transition: color 0.3s var(--ease-cubic), background-size 0.3s var(--ease-cubic);
+  }
+  .shop__tab:hover { color: var(--color-ink); }
+  .shop__tab[aria-pressed='true'] { color: var(--color-ink); background-size: 100% 2px; }
+
+  /* Grid */
+  .shop__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gutter); }
+  @media (min-width: 768px) { .shop__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 1200px) { .shop__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  .tile { position: relative; display: grid; align-content: start; }
+  .tile__media {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+    overflow: hidden;
+  }
+  .tile__media img { width: 100%; height: 100%; object-fit: contain; padding: 8%; transition: transform 0.7s var(--ease-expo); }
+  .tile.is-sold .tile__media img { filter: grayscale(1); opacity: 0.75; }
+  .tile__badges { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 3; }
+  .tile__stamp { position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 3; }
+
+  .tile__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.3);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-cubic);
+    display: grid;
+    align-content: start;
+    gap: 8px;
+  }
+  .tile__title {
+    font-size: clamp(20px, 2vw, 30px);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tile__price { font-size: 13px; }
+  .tile__open { position: absolute; inset: 0; z-index: 4; border-radius: var(--radius-card); aspect-ratio: 1; height: auto; width: 100%; }
+  .tile__add {
+    position: absolute;
+    z-index: 5;
+    left: 14px;
+    top: calc(100% - 14px);
+    translate: 0 -100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease-cubic);
+  }
+  .tile__info { display: none; padding: 10px 2px 8px; gap: 4px; }
+  .tile__maison { font-size: 10px; text-transform: uppercase; opacity: 0.6; }
+  .tile__info .tile__title { font-size: 18px; }
+  .tile__info .tile__price { font-size: 12px; }
+
+  /* Desktop hover reveals the frosted overlay. */
+  @media (hover: hover) and (pointer: fine) {
+    .tile:hover .tile__overlay, .tile:focus-within .tile__overlay { opacity: 1; }
+    .tile:hover .tile__add, .tile:focus-within .tile__add { opacity: 1; pointer-events: auto; }
+    .tile:hover .tile__media img { transform: scale(1.04); }
+    .tile__add { top: auto; bottom: 14px; translate: none; }
+  }
+  /* Touch: never depend on hover. */
+  @media not ((hover: hover) and (pointer: fine)) {
+    .tile__info { display: grid; }
+    .tile__add { display: none; }
+    .tile__open { bottom: auto; }
+  }
+
+  .shop__empty { font-size: clamp(32px, 5vw, 64px); padding: 80px 0; text-align: center; color: var(--color-mute); }
+</style>
+
+<script>
+  import { gsap, Flip, SplitText } from '../../scripts/gsap';
+  import { on } from '../../scripts/events';
+  import { reduced, finePointer } from '../../scripts/env';
+  import { scrollToTarget } from '../../scripts/lenis';
+
+  /* ---------- Featured: giant title reveals char by char on hover ---------- */
+  document.querySelectorAll<HTMLElement>('[data-feat]').forEach((card) => {
+    const title = card.querySelector<HTMLElement>('[data-feat-title]')!;
+    if (reduced || !finePointer) return;
+    let chars: Element[] = [];
+    document.fonts.ready.then(() => {
+      const split = SplitText.create(title, { type: 'chars', mask: 'chars' });
+      chars = split.chars;
+      gsap.set(chars, { yPercent: 150 });
+      title.classList.add('is-ready');
+    });
+    card.addEventListener('pointerenter', () =>
+      gsap.to(chars, { yPercent: 0, duration: 0.35, ease: 'hc-char', stagger: 0.02, overwrite: true }),
+    );
+    card.addEventListener('pointerleave', () =>
+      gsap.to(chars, { yPercent: 150, duration: 0.3, ease: 'hc-cubic', stagger: 0.01, overwrite: true }),
+    );
+  });
+
+  /* ---------- Filtering with Flip ---------- */
+  const grid = document.querySelector<HTMLElement>('[data-shop-grid]')!;
+  const tiles = [...grid.querySelectorAll<HTMLElement>('[data-tile]')];
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+  const empty = document.querySelector<HTMLElement>('[data-shop-empty]')!;
+
+  const matches = (tile: HTMLElement, f: string) =>
+    f === 'all' || (f === 'new' ? tile.dataset.new === 'true' : tile.dataset.category === f);
+
+  const applyFilter = (f: string) => {
+    tabs.forEach((t) => t.setAttribute('aria-pressed', String(t.dataset.filter === f)));
+    const active = tabs.find((t) => t.dataset.filter === f);
+    const list = active?.closest('ul');
+    if (active && list) {
+      list.scrollTo({ left: active.offsetLeft - list.clientWidth / 2 + active.clientWidth / 2, behavior: reduced ? 'auto' : 'smooth' });
+    }
+    const state = reduced ? null : Flip.getState(tiles);
+    let visible = 0;
+    tiles.forEach((tile) => {
+      const show = matches(tile, f);
+      tile.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    empty.hidden = visible > 0;
+    if (state) {
+      Flip.from(state, {
+        duration: 0.6,
+        ease: 'hc-expo',
+        absolute: true,
+        scale: true,
+        onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'hc-cubic' }),
+        onLeave: (els) => gsap.to(els, { opacity: 0, scale: 0.9, duration: 0.3, ease: 'hc-cubic' }),
+      });
+    }
+  };
+
+  tabs.forEach((t) => t.addEventListener('click', () => applyFilter(t.dataset.filter!)));
+
+  on('hc:filter', (d) => {
+    if (!d) return;
+    applyFilter(d.category);
+    // Land with the grid just under the nav + sticky tabs.
+    if (d.scroll) scrollToTarget(grid, -150);
+  });
+</script>

@@ -1,0 +1,295 @@
+---
+import { PRODUCTS, formatCHF } from '../../data/products';
+import PillButton from '../ui/PillButton.astro';
+
+const first = PRODUCTS[0];
+const n = PRODUCTS.length;
+const stateFor = (i: number) => {
+  const d = (((i - 0) % n) + n) % n;
+  if (d === 0) return 'current';
+  if (d === 1) return 'left';
+  if (d === n - 1) return 'right';
+  if (d === n - 2) return 'after';
+  return 'before';
+};
+---
+
+<section class="tick grain" id="tick" aria-labelledby="tick-title" data-tick>
+  <h2 id="tick-title" class="sr-only">One object per second</h2>
+  <p class="mono tick__counter" aria-hidden="true">SEC <span data-tick-sec>00</span></p>
+
+  <div class="tick__stage" data-tick-stage>
+    {
+      PRODUCTS.map((p, i) => (
+        <div class="tick__card" data-state={stateFor(i)} data-tick-card aria-hidden="true">
+          <img src={p.images[0]} alt="" width="1000" height="1000" loading="lazy" decoding="async" />
+          <span class="mono tick__ref">{p.spec.reference}</span>
+        </div>
+      ))
+    }
+
+    <p class="tick__line" aria-hidden="true">One object per second</p>
+
+    <div class="tick__hit" data-tick-hit data-cursor="stop" data-cursor-theme="light">
+      <button type="button" class="tick__open" data-tick-open aria-label={`Stop the clock: ${first.title}`}></button>
+      <div class="tick__caption" data-tick-caption>
+        <p class="mono tick__maison" data-tick-maison>{first.maison}</p>
+        <p class="display tick__title" data-tick-title>{first.title}</p>
+        <p class="mono tick__price" data-tick-price>{formatCHF(first.priceCHF)}</p>
+        <PillButton variant="light" size="sm" data-add={first.id} data-tick-add>Add to cart</PillButton>
+      </div>
+    </div>
+
+    <div class="tick__arrows" data-tick-arrows>
+      <button type="button" class="mono" data-tick-prev aria-label="Previous object">← Prev</button>
+      <button type="button" class="mono" data-tick-next aria-label="Next object">Next →</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tick {
+    position: relative;
+    height: 100svh;
+    min-height: 680px;
+    background: var(--color-slate);
+    color: #fff;
+    overflow: hidden;
+    --focus: var(--color-lume-lime);
+    --cw: min(320px, 64vw);
+    --ch: calc(var(--cw) * 1.3125);
+  }
+  .tick__counter {
+    position: absolute;
+    top: calc(var(--nav-top) + var(--nav-h) + 24px);
+    right: clamp(16px, 3vw, 40px);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    z-index: 6;
+  }
+  .tick__stage { position: absolute; inset: 0; touch-action: pan-y; }
+
+  .tick__card {
+    position: absolute;
+    left: 50%;
+    top: calc(50% - 50px);
+    width: var(--cw);
+    height: var(--ch);
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+    overflow: hidden;
+    opacity: 0;
+    filter: grayscale(1);
+    transition:
+      transform 0.6s var(--ease-expo),
+      opacity 0.3s var(--ease-cubic),
+      filter 0.3s var(--ease-cubic);
+    will-change: transform;
+  }
+  .tick__card img { width: 100%; height: 100%; object-fit: contain; padding: 10%; }
+  .tick__ref { position: absolute; left: 12px; top: 12px; font-size: 10px; color: var(--color-ink); opacity: 0.6; }
+
+  .tick__card[data-state='before'] { transform: translate(-50%, -50%) translateX(-110vw) rotate(-30deg) scale(0.6); }
+  .tick__card[data-state='left'] { transform: translate(-50%, -50%) translateX(-36vw) rotate(-14deg) scale(0.8); }
+  .tick__card[data-state='current'] { transform: translate(-50%, -50%); z-index: 2; }
+  .tick__card[data-state='right'] { transform: translate(-50%, -50%) translateX(36vw) rotate(14deg) scale(0.8); }
+  .tick__card[data-state='after'] { transform: translate(-50%, -50%) translateX(110vw) rotate(30deg) scale(0.6); }
+  .tick__card.is-snap { transition: none; }
+
+  /* Idle: ghost of the current card under the text line. */
+  .tick__card[data-state='current'] { opacity: 0.2; }
+  .tick.is-stopped .tick__card[data-state='current'] { opacity: 1; filter: none; }
+  .tick.is-stopped .tick__card[data-state='left'],
+  .tick.is-stopped .tick__card[data-state='right'] { opacity: 0.6; }
+
+  .tick__line {
+    position: absolute;
+    left: 50%;
+    top: calc(50% - 50px);
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    width: max-content;
+    max-width: 90vw;
+    text-align: center;
+    font-size: clamp(14px, 1.3vw, 18px);
+    letter-spacing: 0.6em;
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease-cubic);
+  }
+  .tick.is-stopped .tick__line { opacity: 0; }
+
+  .tick__hit {
+    position: absolute;
+    left: 50%;
+    top: calc(50% - 50px - var(--ch) / 2);
+    transform: translateX(-50%);
+    width: var(--cw);
+    z-index: 4;
+  }
+  .tick__open {
+    display: block;
+    width: 100%;
+    height: var(--ch);
+    border-radius: var(--radius-card);
+  }
+  .tick__caption {
+    padding-top: 16px;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(12px);
+    visibility: hidden;
+    transition: opacity 0.3s var(--ease-cubic), transform 0.6s var(--ease-expo), visibility 0s linear 0.3s;
+  }
+  .tick.is-stopped .tick__caption { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+  .tick__maison { font-size: 12px; text-transform: uppercase; opacity: 0.7; }
+  .tick__title { font-size: 28px; }
+  .tick__price { font-size: 13px; margin-bottom: 8px; }
+
+  .tick__arrows {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    gap: 24px;
+    z-index: 6;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  :global(.reduced) .tick__arrows { display: flex; }
+  .tick__arrows button { padding: 10px 14px; border-radius: 9999px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4); }
+
+  @media (max-height: 760px) {
+    .tick { --cw: min(260px, 60vw); }
+  }
+  @media (max-width: 480px) {
+    .tick__line { font-size: 12px; white-space: nowrap; letter-spacing: 0.5em; }
+  }
+</style>
+
+<script>
+  import { PRODUCTS, formatCHF } from '../../data/products';
+  import { emit } from '../../scripts/events';
+  import { reduced, mod, pad2, lastPointer, watchVisibility } from '../../scripts/env';
+
+  type State = 'before' | 'left' | 'current' | 'right' | 'after';
+
+  const section = document.querySelector<HTMLElement>('[data-tick]')!;
+  const stage = section.querySelector<HTMLElement>('[data-tick-stage]')!;
+  const cards = [...section.querySelectorAll<HTMLElement>('[data-tick-card]')];
+  const hit = section.querySelector<HTMLElement>('[data-tick-hit]')!;
+  const open = section.querySelector<HTMLButtonElement>('[data-tick-open]')!;
+  const secEl = section.querySelector<HTMLElement>('[data-tick-sec]')!;
+  const maison = section.querySelector<HTMLElement>('[data-tick-maison]')!;
+  const title = section.querySelector<HTMLElement>('[data-tick-title]')!;
+  const price = section.querySelector<HTMLElement>('[data-tick-price]')!;
+  const add = section.querySelector<HTMLButtonElement>('[data-tick-add]')!;
+  const n = cards.length;
+
+  let c = 0;
+  let sec = 0;
+  let stopped = reduced;
+
+  const stateOf = (i: number): State => {
+    const d = mod(i - c, n);
+    if (d === 0) return 'current';
+    if (d === 1) return 'left';
+    if (d === n - 1) return 'right';
+    if (d === n - 2) return 'after';
+    return 'before';
+  };
+
+  const apply = () => {
+    cards.forEach((card, i) => {
+      const prev = card.dataset.state as State;
+      const next = stateOf(i);
+      if (prev === next) return;
+      // Cards wrapping between the off-screen ends jump without a transition.
+      const wrap = (prev === 'after' && next === 'before') || (prev === 'before' && next === 'after');
+      if (wrap) {
+        card.classList.add('is-snap');
+        card.dataset.state = next;
+        void card.offsetWidth;
+        requestAnimationFrame(() => card.classList.remove('is-snap'));
+      } else {
+        card.dataset.state = next;
+      }
+    });
+    const p = PRODUCTS[c];
+    maison.textContent = p.maison;
+    title.textContent = p.title;
+    price.textContent = formatCHF(p.priceCHF);
+    add.dataset.add = p.id;
+    const sold = p.status === 'sold_out';
+    add.disabled = sold;
+    add.querySelector('span')!.textContent = sold ? 'Sold out' : 'Add to cart';
+    open.setAttribute('aria-label', stopped ? `View ${p.title}, ${p.maison}` : `Stop the clock: ${p.title}`);
+  };
+
+  const step = (dir: 1 | -1) => {
+    c = mod(c + dir, n);
+    apply();
+  };
+
+  const setStopped = (v: boolean) => {
+    if (reduced) v = true;
+    stopped = v;
+    section.classList.toggle('is-stopped', v);
+    apply();
+  };
+  setStopped(stopped);
+
+  /* Dead-beat clock: one step per wall-clock second while visible. */
+  const vis = watchVisibility(section);
+  const schedule = () => window.setTimeout(beat, 1000 - (Date.now() % 1000));
+  const beat = () => {
+    if (!stopped && vis.visible && !document.hidden && !reduced) {
+      step(1);
+      sec = (sec + 1) % 60;
+      secEl.textContent = pad2(sec);
+    }
+    schedule();
+  };
+  if (!reduced) schedule();
+
+  /* Mouse: hover stops. Keyboard: focus stops. Touch: tap toggles, swipe steps. */
+  hit.addEventListener('pointerenter', (e) => e.pointerType === 'mouse' && setStopped(true));
+  hit.addEventListener('pointerleave', (e) => e.pointerType === 'mouse' && !hit.contains(document.activeElement) && setStopped(false));
+  hit.addEventListener('focusin', () => setStopped(true));
+  hit.addEventListener('focusout', (e) => {
+    if (!hit.contains(e.relatedTarget as Node) && !hit.matches(':hover')) setStopped(false);
+  });
+
+  open.addEventListener('click', () => {
+    if (lastPointer === 'touch' || lastPointer === 'pen') {
+      if (!swiped) setStopped(!stopped);
+      return;
+    }
+    emit('hc:quickview', { id: PRODUCTS[c].id });
+  });
+
+  let x0 = 0;
+  let y0 = 0;
+  let swiped = false;
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse') return;
+    x0 = e.clientX;
+    y0 = e.clientY;
+    swiped = false;
+  });
+  stage.addEventListener('pointerup', (e) => {
+    if (e.pointerType === 'mouse') return;
+    const dx = e.clientX - x0;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - y0)) {
+      swiped = true;
+      step(dx < 0 ? 1 : -1);
+    }
+  });
+
+  section.querySelector('[data-tick-prev]')?.addEventListener('click', () => step(-1));
+  section.querySelector('[data-tick-next]')?.addEventListener('click', () => step(1));
+</script>

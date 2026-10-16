@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="drop01-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3424"/><stop offset="1" stop-color="#0D100B"/></linearGradient>
+<radialGradient id="drop01-spot" cx=".52" cy=".38" r=".55"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<radialGradient id="drop01-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#D4E87A" stop-opacity=".22"/><stop offset="1" stop-color="#D4E87A" stop-opacity="0"/></radialGradient>
+<linearGradient id="drop01-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
+</defs>
+<rect width="1600" height="1000" fill="url(#drop01-bg)"/>
+<ellipse cx="820" cy="560" rx="620" ry="360" fill="url(#drop01-glow)"/>
+<rect width="1600" height="1000" fill="url(#drop01-spot)"/>
+<rect y="720" width="1600" height="280" fill="url(#drop01-floor)"/>
+<g transform="translate(330 60) scale(.92)">
+<defs><radialGradient id="drop01o-sh"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="470" cy="760" rx="360" ry="34" fill="url(#drop01o-sh)"/>
+<defs>
+<linearGradient id="drop01o-sheen" gradientTransform="rotate(0 .5 .5)">
+<stop offset="0" stop-color="#fff" stop-opacity=".22"/>
+<stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+<stop offset="1" stop-color="#000" stop-opacity=".18"/>
+</linearGradient>
+<linearGradient id="drop01o-brim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C4A3E"/><stop offset="1" stop-color="#15261F"/></linearGradient>
+</defs>
+<path d="M300 660 C300 430 420 300 565 300 C705 300 800 410 800 575 L800 660 Z" fill="#22382F"/>
+<path d="M300 660 C300 430 420 300 565 300 C705 300 800 410 800 575 L800 660 Z" fill="url(#drop01o-sheen)"/>
+<path d="M565 302 C520 390 485 510 476 650" fill="none" stroke="#162720" stroke-width="4"/>
+<path d="M565 302 C625 395 662 515 668 650" fill="none" stroke="#162720" stroke-width="4"/>
+<path d="M565 302 C430 330 340 450 318 600" fill="none" stroke="#2E4A3F" stroke-width="2" opacity=".7"/>
+<rect x="300" y="636" width="500" height="26" rx="4" fill="#15261F"/>
+<ellipse cx="565" cy="300" rx="28" ry="11" fill="#162720"/>
+<path d="M330 640 C250 646 160 668 112 706 C98 718 118 730 152 728 C270 718 380 696 455 660 Z" fill="url(#drop01o-brim)"/>
+<path d="M150 716 C260 708 360 690 440 662" fill="none" stroke="#3A5C4F" stroke-width="2" stroke-dasharray="7 7"/>
+<rect x="372" y="462" width="136" height="70" rx="10" fill="#D4E87A"/>
+<rect x="382" y="472" width="116" height="50" rx="6" fill="none" stroke="#22382F" stroke-width="2" stroke-dasharray="6 5"/>
+<text x="440" y="508" font-family="ui-monospace, monospace" font-size="26" font-weight="700" fill="#22382F" text-anchor="middle">24</text>
+<rect x="772" y="590" width="34" height="56" rx="6" fill="#2E4A3F"/></g>
+</svg>

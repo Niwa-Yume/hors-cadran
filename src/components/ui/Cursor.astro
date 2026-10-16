@@ -1,0 +1,53 @@
+<div class="cursor" data-cursor-root aria-hidden="true">
+  <span class="cursor__dot"></span>
+  <span class="cursor__label mono" data-cursor-label></span>
+</div>
+
+<style>
+  .cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 2000;
+    width: 84px;
+    height: 84px;
+    margin: -42px 0 0 -42px;
+    pointer-events: none;
+    mix-blend-mode: difference;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-cubic);
+    will-change: transform;
+  }
+  .cursor.is-visible { opacity: 1; }
+  .cursor__dot {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #fff;
+    transform: scale(calc(10 / 84));
+    transition: transform 0.4s var(--ease-expo), background-color 0.3s var(--ease-cubic);
+  }
+  .cursor.is-down .cursor__dot { transform: scale(calc(7 / 84)); }
+  .cursor__label {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: #fff;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.2s var(--ease-cubic), transform 0.4s var(--ease-expo);
+  }
+  .cursor.is-label { mix-blend-mode: normal; }
+  .cursor.is-label .cursor__dot { transform: scale(1); background: var(--color-ink); }
+  .cursor.is-label .cursor__label { opacity: 1; transform: none; }
+  .cursor.is-label.is-light .cursor__dot { background: var(--color-paper); }
+  .cursor.is-label.is-light .cursor__label { color: var(--color-ink); }
+  .cursor.is-label.is-down .cursor__dot { transform: scale(0.9); }
+</style>
+
+<script>
+  import '../../scripts/cursor';
+</script>

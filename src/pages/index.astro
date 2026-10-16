@@ -1,0 +1,85 @@
+---
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/geist-mono/wght.css';
+import '@fontsource/instrument-serif/latin-400-italic.css';
+import '@fontsource/unifrakturmaguntia/latin-400.css';
+import archivoLatin from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
+import '../styles/global.css';
+
+import { BRAND_NAME, SUBLINE, TAGLINE } from '../data/brand';
+import { DROPS } from '../data/products';
+
+import Preloader from '../components/sections/Preloader.astro';
+import Nav from '../components/sections/Nav.astro';
+import HeroFrame from '../components/sections/HeroFrame.astro';
+import MarqueeBand from '../components/sections/MarqueeBand.astro';
+import TheTick from '../components/sections/TheTick.astro';
+import TheDial from '../components/sections/TheDial.astro';
+import Shop from '../components/sections/Shop.astro';
+import SpecSheet from '../components/sections/SpecSheet.astro';
+import Watching from '../components/sections/Watching.astro';
+import ShipsWorldwide from '../components/sections/ShipsWorldwide.astro';
+import Footer from '../components/sections/Footer.astro';
+import Cursor from '../components/ui/Cursor.astro';
+import CartDrawer from '../components/ui/CartDrawer.astro';
+import QuickView from '../components/ui/QuickView.astro';
+import Toast from '../components/ui/Toast.astro';
+
+const title = `${BRAND_NAME} — ${TAGLINE.replace(/\.$/, '')}`;
+const description = `${BRAND_NAME}: independent Geneva reseller of authentic watch-house goodies. Playing cards, caps, wallets, valet trays, boxes, press kits. ${SUBLINE}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#F1F1F1" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="image" href={DROPS[0].image} fetchpriority="high" />
+    <link rel="preload" as="font" type="font/woff2" href={archivoLatin} crossorigin />
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        try {
+          if (sessionStorage.getItem('hc-preloaded') || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            d.classList.add('no-preloader');
+          }
+        } catch (e) {
+          d.classList.add('no-preloader');
+        }
+      })();
+    </script>
+  </head>
+  <body id="top">
+    <a href="#shop" class="skip-link pill pill--solid">Skip to shop</a>
+    <Preloader />
+    <Cursor />
+    <Nav />
+    <main id="main">
+      <HeroFrame />
+      <MarqueeBand />
+      <TheTick />
+      <TheDial />
+      <Shop />
+      <SpecSheet />
+      <Watching />
+      <ShipsWorldwide />
+    </main>
+    <Footer />
+    <CartDrawer />
+    <QuickView />
+    <Toast />
+    <script>
+      import '../scripts/lenis';
+      import '../scripts/reveal';
+      import '../scripts/cart';
+    </script>
+  </body>
+</html>

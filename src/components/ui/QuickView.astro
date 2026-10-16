@@ -1,0 +1,92 @@
+<dialog class="qv" data-quickview-dialog aria-labelledby="qv-title">
+  <div class="qv__panel" data-qv-panel>
+    <button class="qv__close mono" type="button" data-dialog-close aria-label="Close quick view">Close ✕</button>
+    <div class="qv__media grain" data-qv-media></div>
+    <div class="qv__body" data-qv-body></div>
+  </div>
+</dialog>
+
+<style>
+  .qv {
+    width: min(1040px, calc(100vw - 2 * var(--gutter)));
+    max-width: none;
+    max-height: calc(100dvh - 2 * var(--gutter));
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .qv::backdrop { background: rgba(0, 0, 0, 0.35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: hc-fade 0.6s var(--ease-expo); }
+  @keyframes hc-fade { from { opacity: 0; } }
+
+  .qv__panel {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    max-height: calc(100dvh - 2 * var(--gutter));
+    overflow: auto;
+    overscroll-behavior: contain;
+    background: var(--color-white);
+    border-radius: var(--radius-glass);
+    color: var(--color-ink);
+  }
+  @media (min-width: 768px) {
+    .qv__panel { grid-template-columns: 1fr 1fr; overflow: hidden; }
+  }
+  .qv__close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    z-index: 6;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.8);
+  }
+  .qv__media { background: var(--color-paper); aspect-ratio: 1; display: grid; place-items: center; }
+  @media (min-width: 768px) { .qv__media { aspect-ratio: auto; min-height: 560px; } }
+  :global(.qv__img) { width: 84%; height: 84%; object-fit: contain; }
+  :global(.qv__img.is-sold) { filter: grayscale(1); }
+  .qv__body { padding: 28px; display: flex; flex-direction: column; gap: 16px; }
+  @media (min-width: 768px) { .qv__body { padding: 40px; overflow: auto; } }
+
+  :global(.qv__maison) { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; }
+  :global(.qv__title) { font-family: var(--font-display); font-stretch: 62%; font-weight: 800; text-transform: uppercase; line-height: 0.88; font-size: clamp(36px, 4vw, 56px); }
+  :global(.qv__price) { font-family: var(--font-mono); font-size: 18px; }
+  :global(.qv__actions) { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: auto; padding-top: 8px; }
+</style>
+
+<script>
+  import { makeDialog } from '../../scripts/dialog';
+  import { on } from '../../scripts/events';
+  import { productById, categoryById, formatCHF } from '../../data/products';
+  import { specRowsHTML } from '../../scripts/spec';
+  import { pillHTML, esc } from '../../scripts/ui';
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-quickview-dialog]')!;
+  const panel = dialog.querySelector<HTMLElement>('[data-qv-panel]')!;
+  const media = dialog.querySelector<HTMLElement>('[data-qv-media]')!;
+  const body = dialog.querySelector<HTMLElement>('[data-qv-body]')!;
+  const qv = makeDialog(dialog, panel, { from: { y: 40, scale: 0.97, opacity: 0 } });
+
+  on('hc:quickview', (d) => {
+    const p = d && productById(d.id);
+    if (!p) return;
+    const cat = categoryById(p.category);
+    panel.style.setProperty('--accent', cat.accent);
+    panel.style.setProperty('--on-accent', cat.onAccent);
+    const sold = p.status === 'sold_out';
+    media.innerHTML = `<img class="qv__img${sold ? ' is-sold' : ''}" src="${p.images[0]}" alt="${esc(p.title)}, ${esc(p.maison)}" width="1000" height="1000" />`;
+    body.innerHTML = `
+      <p class="qv__maison">● ${esc(p.maison)} — ${esc(cat.label)}</p>
+      <h2 id="qv-title" class="qv__title">${esc(p.title)}</h2>
+      <p class="qv__price">${formatCHF(p.priceCHF)}${p.status === 'one_of_one' ? ' <span class="badge badge--ink" style="vertical-align:middle;margin-left:8px">One of one</span>' : ''}${sold ? ' <span class="stamp" style="display:inline-block;margin-left:12px;font-size:18px">Sold out</span>' : ''}</p>
+      <dl class="spec spec--compact">${specRowsHTML(p, true)}</dl>
+      <div class="qv__actions">
+        ${pillHTML(sold ? 'Sold out' : 'Add to cart', `data-add="${p.id}" ${sold ? 'disabled' : ''}`, 'solid')}
+      </div>`;
+    qv.open();
+  });
+</script>
